@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "mycoro",
+  "private_key_id": "7424dc1d9240ea58bf9036fecc8efad071346e52",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDrLa7EpjziQd/z\nLRsotUfetanWaTx+5YNL/cyXANBbi21jtTFTau2ZjVrNIG6PFHmaehLiBe32rxbg\nXwKulY0+tApDXbvvbKJN7jX4wm469QxNmni1LxSimCmMvME17NMyXSranpaNe97U\nYn+ZZqYgHbPvUJkhLYb3in+/cP9WcwTeCPL1UHDsBSuAyEhIK1vNBJG73rJ7zoNm\nf2nHGn84HXml/1aH+WwRFVEkG+ruRWPTnTzB/j7cDWYE+2qagZIq25RtsCvf420c\nnUquZeWixq9angkyh5vMLS5CweVIqOXAON3LzbnZ2462woc7iO7fyWbBGe0OLKWm\nEuQ1T3/JAgMBAAECggEAEEsjcxtjV3eh6OqkmY7pskvavvCekNoc3Rxx2rpjNRx1\nUTWh+7oKSRuqgVCwaDhObn3rpf4sLO2Xg6cBfA//b6swlNc/KIjZu9V3psrtsSb+\nGbhMiZz/7H3nTwlax34nabNbvzbCjn3ZA9TpKzsZ4lq8dyWZ3lsVoTvWuvA8uIPw\nf6hOhuntByJT8hfT3HLFHbAsfkEHDRYQom980bd+0lX81/QM93101YbhKhkCs4li\nqpLH0MdU85m4EOYcjwQwiSSSE/9XG91k8eJOwCHhrfzSjZvZ53mKvtIvYi/HGVCj\nniAMSxF24Ejk9JJOd/Lu7dFJKsnYnuy0jASMfhZ5OwKBgQD3nJFaVzMSoVXmKUoC\neqeTEL79+lXGb9mjYsub+tfgrPbzp6E4ab6N+YrrX9wIvKk2BIiLhLB+wYMSdr7T\nrSnFLso/31fwSYVtynOoOnsSKWQgDAAiBT+1LWwU9BqgUP4ZmDlkDBzfIftC3cxg\nkK7kUakUxY8ugoQqBAQ509sgDwKBgQDzJUmUGD1XA+CvSXeQ2/DoJGuRa5SE+ZkL\noCA2CSJsX6J/AXJHTWzxtrGD9cyJ12UVM2LtiT3A1yemQrQmGcHvlYgyuSvFHk19\nAflWFma07DvhO7TLDWZye2gzs3RQCoqiuqo7Pk8eyOqShgmvWY4hZ1oVeykf/FFu\ne8wM3xMKpwKBgHwj4ffSCggIHQHUp4dQqR0hYzAARurC/vFcQcqE26CH9xO3civP\nUDrr5ksVd0JmG8u6QB76umYCbM1f/VIw2eVDDSEyv2r34U5nFs876qHzYIB0o8hq\nq0MRb8Odko/Xq113pSZUsFDqP4eJncK4JwbPLh784UknJE3QT7ISViTfAoGAczNo\ngCVX8sFglEx/vP+oTaTr3lOVY8eKrspoWJHNYIGTUQ+TYJsbkg6YXsh355tJRlk5\ndwf+XT7Th1+1URQFIgm8JSQ8y8FGv4LO6u3kLbZ7zIRobYhk0LsNrOlKo53K/7zn\naPhlrlVNZqzhK9aHk+YO9XyMCJ6YynsXO8X5lKMCgYA9mcr5b5qrf/trSy/EgqPy\nCNKpIkVc2pkx53osVo2r2wctF6OEwVOL1bXNIRQ5+z/PLWX4BpATsbiIZOlHifj2\n2MQ9DdkIgqXg9ue7ZmguCS716b6mLB/bM+Cwbv1izQWWxIOUNdggMBwtEktN2Bpe\nZZjPMohTI0Y15ovm8FIEqQ==\n-----END PRIVATE KEY-----\n",
+  "client_email": "mycoro@mycoro.iam.gserviceaccount.com",
+  "client_id": "114587785205154563037",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/mycoro%40mycoro.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
