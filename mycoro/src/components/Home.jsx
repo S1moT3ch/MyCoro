@@ -1,8 +1,8 @@
-import GoogleDocPublicReader from "./GoogleDocPublicReader";
+import GoogleDocFormattedReader from "./GoogleDocFormattedReader";
 
 export default function Home() {
     return (
-        <GoogleDocPublicReader
+        <GoogleDocFormattedReader
             fileId="1ewNiV4EzzRl0R5EdllipPE4QtMhmhPXcuuy2kx9bqYY"
             apiKey="AIzaSyBMKPufX0VLfz53MbmRmd6eC-7D1eSAOL8"
         />

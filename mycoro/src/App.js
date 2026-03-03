@@ -1,17 +1,19 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { CantiProvider } from "./components/CantiContext";
 import Home from "./components/Home";
-import DocumentPage from "./components/DocumentPage";
 import CantoPage from "./components/CantoPage";
 
 function App() {
     return (
-        <BrowserRouter>
-            <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/doc/:id" element={<DocumentPage />} />7
-                <Route path="/canti/:numero" element={<CantoPage />} />
-            </Routes>
-        </BrowserRouter>
+        <CantiProvider>
+            <BrowserRouter>
+                <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/canti/:numero" element={<CantoPage />} />
+                    <Route path="*" element={<h1>404</h1>} />
+                </Routes>
+            </BrowserRouter>
+        </CantiProvider>
     );
 }
 

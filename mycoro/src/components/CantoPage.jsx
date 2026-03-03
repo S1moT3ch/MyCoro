@@ -1,54 +1,37 @@
-import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
-import GoogleDocFormattedReader from "./GoogleDocPublicReader";
+import { useParams, Link } from "react-router-dom";
+import { useContext } from "react";
+import { CantiContext } from "./CantiContext";
+import GoogleDocFormattedReader from "./GoogleDocFormattedReader";
 
 const API_KEY = "AIzaSyBMKPufX0VLfz53MbmRmd6eC-7D1eSAOL8";
-const FOLDER_ID = "1l7Fr0-JyPHlrqzQZV2Z3c3YEW6nv3eUF";
 
 const CantoPage = () => {
     const { numero } = useParams();
-    const [fileId, setFileId] = useState(null);
-    const [fileName, setFileName] = useState("");
-    const [error, setError] = useState(null);
+    const { cantiMap, numeriOrdinati, loading } = useContext(CantiContext);
 
-    useEffect(() => {
-        const fetchCanto = async () => {
-            try {
-                const query = encodeURIComponent(
-                    `'${FOLDER_ID}' in parents and mimeType='application/vnd.google-apps.document'`
-                );
+    if (loading) return <p>Caricamento canti...</p>;
 
-                const response = await fetch(
-                    `https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name)&key=${API_KEY}`
-                );
+    const numeroInt = parseInt(numero, 10);
+    const canto = cantiMap[numeroInt];
 
-                const data = await response.json();
+    if (!canto) return <h2>Canto non trovato</h2>;
 
-                const file = data.files.find(f => f.name.startsWith(`${numero}-`));
-
-                if (!file) {
-                    setError("Canto non trovato");
-                    return;
-                }
-
-                setFileId(file.id);
-                setFileName(file.name);
-            } catch (err) {
-                setError("Errore nel recupero file");
-                console.error(err);
-            }
-        };
-
-        fetchCanto();
-    }, [numero]);
-
-    if (error) return <p>{error}</p>;
-    if (!fileId) return <p>Caricamento...</p>;
+    const index = numeriOrdinati.indexOf(numeroInt);
+    const prev = numeriOrdinati[index - 1];
+    const next = numeriOrdinati[index + 1];
 
     return (
         <div>
-            <h1>{fileName}</h1>
-            <GoogleDocFormattedReader fileId={fileId} apiKey={API_KEY} />
+            <GoogleDocFormattedReader
+                fileId={canto.id}
+                apiKey={API_KEY}
+            />
+
+            <div style={{ marginTop: 40 }}>
+                {prev && <Link to={`/canti/${prev}`}>⬅ Precedente</Link>}
+                {"  "}
+                {next && <Link to={`/canti/${next}`}>Successivo ➡</Link>}
+            </div>
         </div>
     );
 };

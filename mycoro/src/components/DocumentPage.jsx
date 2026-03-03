@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import GoogleDocFormattedReader from "./GoogleDocPublicReader";
+import GoogleDocFormattedReader from "./GoogleDocFormattedReader";
 
 const API_KEY = "AIzaSyBMKPufX0VLfz53MbmRmd6eC-7D1eSAOL8";
 
