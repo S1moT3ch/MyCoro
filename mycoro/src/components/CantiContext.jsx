@@ -1,9 +1,10 @@
 import { createContext, useEffect, useState } from "react";
+import { DOCS_DRIVE_KEY, GOOGLE_FOLDER_ID } from "./config/config";
 
 export const CantiContext = createContext();
 
-const API_KEY = "AIzaSyBMKPufX0VLfz53MbmRmd6eC-7D1eSAOL8";
-const FOLDER_ID = "1l7Fr0-JyPHlrqzQZV2Z3c3YEW6nv3eUF";
+const API_KEY = DOCS_DRIVE_KEY;
+const FOLDER_ID = GOOGLE_FOLDER_ID;
 
 const CACHE_KEY = "canti_cache";
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 ore

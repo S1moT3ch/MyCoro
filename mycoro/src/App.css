@@ -28,6 +28,47 @@
   color: #61dafb;
 }
 
+.liturgical-content * {
+  font-size: inherit !important;
+}
+
+/* Wrapper principale */
+.liturgical-content {
+  font-family: Georgia, serif;
+  line-height: 1.9;
+  letter-spacing: 0.3px;
+  font-size: inherit; /* eredita dal wrapper di ListaCanti */
+}
+
+/* Paragrafi con spazio */
+.liturgical-content p {
+  margin-bottom: 10em; !important; /* spazio tra paragrafi */
+}
+
+/* Titoli e intestazioni centrati */
+.liturgical-content h1,
+.liturgical-content h2,
+.liturgical-content h3 {
+  text-align: center;
+  margin-top: 1.8em;
+  margin-bottom: 1em;
+}
+
+/* Ritornelli o grassetti centrati */
+.liturgical-content strong {
+  display: block;
+  margin: 1.8em 0;
+  text-align: center;
+  font-weight: 700;
+}
+
+/* Per bullet point “●” o simili */
+.liturgical-content ul,
+.liturgical-content ol {
+  padding-left: 1.4em;
+  margin-bottom: 1.2em;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

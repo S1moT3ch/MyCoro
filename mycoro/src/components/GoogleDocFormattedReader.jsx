@@ -20,7 +20,26 @@ const GoogleDocFormattedReader = ({ fileId, apiKey }) => {
                 }
 
                 const htmlText = await response.text();
-                setHtml(htmlText);
+
+                // 🔥 PARSING E PULIZIA
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlText, "text/html");
+
+                // 1️⃣ Prendiamo solo il body
+                const bodyContent = doc.body;
+
+                // 2️⃣ Rimuoviamo attributi di stile dal body
+                //bodyContent.removeAttribute("style");
+
+                // 3️⃣ Rimuoviamo tutti i font-size inline
+                bodyContent.querySelectorAll("*").forEach(el => {
+                    if (el.style) {
+                        el.style.fontSize = null;
+                    }
+                });
+
+                setHtml(bodyContent.innerHTML);
+
             } catch (err) {
                 setError(err.message);
             } finally {
@@ -32,7 +51,7 @@ const GoogleDocFormattedReader = ({ fileId, apiKey }) => {
     }, [fileId, apiKey]);
 
     return (
-        <div style={{ maxWidth: 800, margin: "0 auto" }}>
+        <>
             {loading && <p>Caricamento...</p>}
             {error && <p style={{ color: "red" }}>{error}</p>}
             {!loading && !error && (
@@ -40,7 +59,7 @@ const GoogleDocFormattedReader = ({ fileId, apiKey }) => {
                     dangerouslySetInnerHTML={{ __html: html }}
                 />
             )}
-        </div>
+        </>
     );
 };
 
