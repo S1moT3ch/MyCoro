@@ -1,7 +1,8 @@
 import { useEffect, useState, useContext } from "react";
+import { useParams } from "react-router-dom";
 import { CantiContext } from "./CantiContext";
 import GoogleDocFormattedReader from "./GoogleDocFormattedReader";
-import { DOCS_DRIVE_KEY, GOOGLE_SHEETS_KEY, SHEETS_D1030_ID } from "./config/config";
+import { DOCS_DRIVE_KEY, GOOGLE_SHEETS_KEY, SHEETS_ID } from "./config/config";
 
 import {
     Container,
@@ -53,6 +54,7 @@ export default function ListaCanti() {
     const [fontSize, setFontSize] = useState(18);
 
     const [celebrazione, setCelebrazione] = useState("");
+    const { nomeCelebrazione } = useParams()
 
     const increaseFont = () => setFontSize(prev => Math.min(prev + 2, 32));
     const decreaseFont = () => setFontSize(prev => Math.max(prev - 2, 14));
@@ -61,7 +63,7 @@ export default function ListaCanti() {
         async function caricaNumeri() {
             try {
                 const res = await fetch(
-                    `https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_D1030_ID}/values/Domenica_10.30?key=${GOOGLE_SHEETS_KEY}`
+                    `https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_ID}/values/${nomeCelebrazione}?key=${GOOGLE_SHEETS_KEY}`
                 );
                 const data = await res.json();
                 const { numeri, celebrazione } = processSheetData(data);
