@@ -13,7 +13,6 @@ import {
     Box,
     Divider,
     IconButton,
-    Stack
 } from "@mui/material";
 
 import TextIncreaseIcon from "@mui/icons-material/TextIncrease";
@@ -77,7 +76,7 @@ export default function ListaCanti() {
         }
 
         caricaNumeri();
-    }, []);
+    }, [nomeCelebrazione]);
 
     if (loading || loadingSheet)
         return (
