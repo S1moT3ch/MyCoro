@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { APPS_SCRIPTS_URL } from "./config/config";
 import {
     Container, Typography, Box, CircularProgress, TextField,
@@ -15,6 +15,11 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import SaveIcon from '@mui/icons-material/Save';
 import DragHandleIcon from '@mui/icons-material/DragHandle';
+import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
+// Icone Condivisione
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import CheckIcon from '@mui/icons-material/Check';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 
 import Login from "./Login";
 import { useAuth } from "./AuthContext";
@@ -24,6 +29,7 @@ const generateId = () => `canto-${Date.now()}-${Math.random().toString(36).subst
 export default function AdminCanti() {
     const { nomeCelebrazione } = useParams();
     const { user, token, logout } = useAuth();
+    const navigate = useNavigate();
 
     const [canti, setCanti] = useState([]);
     const [intestazione, setIntestazione] = useState("");
@@ -34,6 +40,26 @@ export default function AdminCanti() {
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [cantoToDelete, setCantoToDelete] = useState(null);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+    const [openDeleteSheetDialog, setOpenDeleteSheetDialog] = useState(false);
+    const [deletingSheet, setDeletingSheet] = useState(false);
+
+    // --- NUOVO STATO: Controllo per il pop-up di condivisione post-salvataggio ---
+    const [openShareDialog, setOpenShareDialog] = useState(false);
+    const [copied, setCopied] = useState(false);
+
+    const publicLink = `${window.location.origin}/celebrazioni/${nomeCelebrazione}`;
+
+    const handleCopyLink = () => {
+        navigator.clipboard.writeText(publicLink);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
+    const handleWhatsAppShare = () => {
+        const text = `Ecco i canti per ${intestazione || nomeCelebrazione}:\n${publicLink}`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    };
 
     useEffect(() => {
         const handleBeforeUnload = (e) => {
@@ -183,14 +209,49 @@ export default function AdminCanti() {
                 } else setError(data.error);
                 setSaving(false);
             } else {
-                alert("Modifiche salvate con successo!");
+                // MODIFICA QUI: Invece dell'alert, impostiamo gli stati per il successo!
                 setHasUnsavedChanges(false);
                 syncData();
                 setSaving(false);
+                setOpenShareDialog(true); // <-- Apre il nuovo pop-up di condivisione
             }
         } catch (err) {
             setError("Errore nel salvataggio");
             setSaving(false);
+        }
+    };
+
+    const handleDeleteSheet = async () => {
+        setDeletingSheet(true);
+        setError("");
+
+        try {
+            const res = await fetch(APPS_SCRIPTS_URL, {
+                method: "POST",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify({
+                    action: "deleteSheet",
+                    sheet: nomeCelebrazione,
+                    token: token
+                }),
+            });
+            const data = await res.json();
+
+            if (data.error) {
+                if (data.error.includes("scaduto") || data.error.includes("Non autorizzato")) {
+                    logout();
+                    setError("Sessione scaduta. Riprova.");
+                } else setError(data.error);
+                setDeletingSheet(false);
+                setOpenDeleteSheetDialog(false);
+            } else {
+                setHasUnsavedChanges(false);
+                navigate("/admin/edit");
+            }
+        } catch (err) {
+            setError("Errore durante l'eliminazione della celebrazione");
+            setDeletingSheet(false);
+            setOpenDeleteSheetDialog(false);
         }
     };
 
@@ -218,9 +279,14 @@ export default function AdminCanti() {
                             <Typography variant="body2" color="text.secondary">{user.email}</Typography>
                         </Box>
                     </Box>
-                    <Button variant="outlined" color="error" size="small" onClick={handleLogoutClick} sx={{ textTransform: 'none', borderRadius: 2 }}>
-                        Esci
-                    </Button>
+                    <Box>
+                        <Button variant="text" color="primary" size="small" onClick={() => navigate("/admin/edit")} sx={{ textTransform: 'none', mr: 1 }}>
+                            Indietro
+                        </Button>
+                        <Button variant="outlined" color="error" size="small" onClick={handleLogoutClick} sx={{ textTransform: 'none', borderRadius: 2 }}>
+                            Esci
+                        </Button>
+                    </Box>
                 </Paper>
 
                 <Typography variant="h5" sx={{ mb: 1, fontWeight: "800", color: 'primary.main', textAlign: { xs: "center", sm: "left" } }}>
@@ -229,6 +295,32 @@ export default function AdminCanti() {
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 3, textAlign: { xs: "center", sm: "left" } }}>
                     Tieni premuta l'icona a sinistra per riordinare i canti.
                 </Typography>
+
+                {/* Ho mantenuto anche la scheda inline in caso l'utente chiuda il popup ma voglia comunque copiare il link dopo */}
+                {!hasUnsavedChanges && (
+                    <Paper elevation={1} sx={{ p: 2, mb: 4, borderRadius: 3, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: 'center', gap: 2, bgcolor: 'white' }}>
+                        <Box sx={{ flexGrow: 1, width: '100%' }}>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold', mb: 0.5, display: 'block', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                                Link Pubblico Condivisibile
+                            </Typography>
+                            <Typography variant="body2" sx={{ p: 1.5, bgcolor: '#f1f3f4', borderRadius: 2, wordBreak: 'break-all', fontFamily: 'monospace', color: 'text.primary' }}>
+                                {publicLink}
+                            </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', gap: 1, flexShrink: 0, alignSelf: { xs: 'flex-end', sm: 'center' } }}>
+                            <Tooltip title={copied ? "Copiato!" : "Copia Link"}>
+                                <IconButton onClick={handleCopyLink} color={copied ? "success" : "primary"} sx={{ bgcolor: copied ? '#e8f5e9' : '#e3f2fd', '&:hover': { bgcolor: copied ? '#c8e6c9' : '#bbdefb' } }}>
+                                    {copied ? <CheckIcon /> : <ContentCopyIcon />}
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Condividi su WhatsApp">
+                                <IconButton onClick={handleWhatsAppShare} sx={{ bgcolor: '#e8f5e9', color: '#2e7d32', '&:hover': { bgcolor: '#c8e6c9' } }}>
+                                    <WhatsAppIcon />
+                                </IconButton>
+                            </Tooltip>
+                        </Box>
+                    </Paper>
+                )}
 
                 {error && <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>{error}</Alert>}
 
@@ -250,7 +342,6 @@ export default function AdminCanti() {
                                                         display: "flex", gap: { xs: 1, sm: 2 }, alignItems: "center", p: { xs: 1, sm: 1.5 },
                                                         borderRadius: 2, bgcolor: 'white',
                                                         mt: isCategoriaPrincipale && idx !== 0 ? 2 : 0,
-                                                        // RIMOSSO il margine sinistro, ora TUTTE le card sono allineate a sinistra in colonna perfetta
                                                         ...provided.draggableProps.style
                                                     }}
                                                 >
@@ -261,16 +352,14 @@ export default function AdminCanti() {
                                                         <DragHandleIcon />
                                                     </Box>
 
-                                                    {/* Invece di avere i campi sciolti, li mettiamo in un Box che gestisce gli spazi */}
                                                     <Box sx={{ display: 'flex', flexGrow: 1, gap: 1, alignItems: 'center' }}>
                                                         {isCategoriaPrincipale ? (
                                                             <TextField
-                                                                label="Categoria" variant="outlined" value={canto.categoria}
+                                                                label="Canto per" variant="outlined" value={canto.categoria}
                                                                 onChange={(e) => handleChange(idx, "categoria", e.target.value)}
                                                                 sx={{ flexGrow: 1, minWidth: 0 }} size="small"
                                                             />
                                                         ) : (
-                                                            // SPAZIATORE: Occupa lo stesso spazio del TextField "Categoria", mantenendo il campo "N°" perfettamente in colonna!
                                                             <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', pl: 1 }}>
                                                                 <Typography color="text.secondary" sx={{ opacity: 0.5 }}>↳</Typography>
                                                             </Box>
@@ -314,6 +403,19 @@ export default function AdminCanti() {
                     {saving ? "Salvataggio in corso..." : "Salva Modifiche"}
                 </Button>
 
+                <Box sx={{ mt: 5, pt: 3, borderTop: '1px solid #e0e0e0', display: 'flex', justifyContent: 'center' }}>
+                    <Button
+                        variant="text"
+                        color="error"
+                        startIcon={<DeleteSweepIcon />}
+                        onClick={() => setOpenDeleteSheetDialog(true)}
+                        sx={{ textTransform: 'none' }}
+                    >
+                        Elimina questa celebrazione
+                    </Button>
+                </Box>
+
+                {/* Dialog Eliminazione Singolo Canto */}
                 <Dialog open={openDeleteDialog} onClose={cancelDelete} PaperProps={{ sx: { borderRadius: 3 } }}>
                     <DialogTitle sx={{ fontWeight: 'bold' }}>Eliminare il canto?</DialogTitle>
                     <DialogContent>
@@ -328,6 +430,68 @@ export default function AdminCanti() {
                     <DialogActions sx={{ p: 2 }}>
                         <Button onClick={cancelDelete} color="inherit" sx={{ textTransform: 'none', fontWeight: 'bold' }}>Annulla</Button>
                         <Button onClick={confirmDelete} color="error" variant="contained" disableElevation sx={{ textTransform: 'none', borderRadius: 2, fontWeight: 'bold' }}>Elimina</Button>
+                    </DialogActions>
+                </Dialog>
+
+                {/* Dialog Eliminazione Intera Celebrazione */}
+                <Dialog open={openDeleteSheetDialog} onClose={() => !deletingSheet && setOpenDeleteSheetDialog(false)} PaperProps={{ sx: { borderRadius: 3 } }}>
+                    <DialogTitle sx={{ fontWeight: 'bold', color: 'error.main' }}>Attenzione: Azione irreversibile</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            Sei sicuro di voler eliminare l'intera celebrazione <b>"{intestazione || nomeCelebrazione}"</b>?<br/><br/>
+                            Tutti i canti associati verranno cancellati in modo definitivo da Google Sheets e non potranno essere recuperati.
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions sx={{ p: 2 }}>
+                        <Button onClick={() => setOpenDeleteSheetDialog(false)} color="inherit" disabled={deletingSheet} sx={{ textTransform: 'none', fontWeight: 'bold' }}>
+                            Annulla
+                        </Button>
+                        <Button onClick={handleDeleteSheet} color="error" variant="contained" disabled={deletingSheet} disableElevation sx={{ textTransform: 'none', borderRadius: 2, fontWeight: 'bold' }}>
+                            {deletingSheet ? "Eliminazione..." : "Sì, elimina tutto"}
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+
+                {/* --- NUOVO DIALOG: POP-UP CONDIVISIONE POST-SALVATAGGIO --- */}
+                <Dialog open={openShareDialog} onClose={() => setOpenShareDialog(false)} PaperProps={{ sx: { borderRadius: 3, minWidth: { xs: '90%', sm: 400 } } }}>
+                    <DialogTitle sx={{ fontWeight: 'bold', color: 'success.main', display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <CheckIcon /> Salvataggio Completato
+                    </DialogTitle>
+                    <DialogContent>
+                        <DialogContentText sx={{ mb: 2 }}>
+                            I canti sono stati aggiornati. Vuoi condividere il link della celebrazione?
+                        </DialogContentText>
+
+                        <Box sx={{ p: 2, bgcolor: '#f1f3f4', borderRadius: 2, mb: 3 }}>
+                            <Typography variant="body2" sx={{ wordBreak: 'break-all', fontFamily: 'monospace', color: 'text.primary', textAlign: 'center' }}>
+                                {publicLink}
+                            </Typography>
+                        </Box>
+
+                        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, justifyContent: 'center' }}>
+                            <Button
+                                variant={copied ? "contained" : "outlined"}
+                                color={copied ? "success" : "primary"}
+                                startIcon={copied ? <CheckIcon /> : <ContentCopyIcon />}
+                                onClick={handleCopyLink}
+                                sx={{ textTransform: 'none', borderRadius: 2, flexGrow: 1, py: 1 }}
+                            >
+                                {copied ? "Link Copiato" : "Copia Link"}
+                            </Button>
+                            <Button
+                                variant="contained"
+                                startIcon={<WhatsAppIcon />}
+                                onClick={handleWhatsAppShare}
+                                sx={{ textTransform: 'none', borderRadius: 2, flexGrow: 1, py: 1, bgcolor: '#25D366', '&:hover': { bgcolor: '#128C7E' }, color: 'white' }}
+                            >
+                                Invia su WhatsApp
+                            </Button>
+                        </Box>
+                    </DialogContent>
+                    <DialogActions sx={{ p: 2, pt: 0, justifyContent: 'center' }}>
+                        <Button onClick={() => setOpenShareDialog(false)} color="inherit" sx={{ textTransform: 'none', fontWeight: 'bold' }}>
+                            Chiudi
+                        </Button>
                     </DialogActions>
                 </Dialog>
 
