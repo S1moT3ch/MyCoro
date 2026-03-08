@@ -26,7 +26,7 @@ export default function Dashboard() {
 
     useEffect(() => {
         if (!user) {
-            navigate("/");
+            navigate("/admin/login");
         }
     }, [user, navigate]);
 
@@ -185,7 +185,7 @@ export default function Dashboard() {
                                 autoFocus
                                 fullWidth
                                 variant="outlined"
-                                label="Nome (es. Domenica, Matrimonio Rossi)"
+                                label="Nome (es. Domenica, Natale, Pasqua)"
                                 value={newCelName}
                                 onChange={(e) => setNewCelName(e.target.value)}
                                 disabled={creating}

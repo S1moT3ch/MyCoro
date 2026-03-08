@@ -439,7 +439,7 @@ export default function AdminCanti() {
                     <DialogContent>
                         <DialogContentText>
                             Sei sicuro di voler eliminare l'intera celebrazione <b>"{intestazione || nomeCelebrazione}"</b>?<br/><br/>
-                            Tutti i canti associati verranno cancellati in modo definitivo da Google Sheets e non potranno essere recuperati.
+                            La celebrazione verrà cancellata in modo definitivo e non potrà essere recuperata.
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions sx={{ p: 2 }}>

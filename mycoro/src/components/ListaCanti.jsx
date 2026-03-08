@@ -1,6 +1,7 @@
 import { useEffect, useState, useContext } from "react";
 import { useParams } from "react-router-dom";
 import { CantiContext } from "./CantiContext";
+import { ZoomContext } from "./ZoomContext"; // Importa lo ZoomContext
 import GoogleDocFormattedReader from "./GoogleDocFormattedReader";
 import { DOCS_DRIVE_KEY, GOOGLE_SHEETS_KEY, SHEETS_ID } from "./config/config";
 
@@ -15,9 +16,6 @@ import {
     IconButton,
 } from "@mui/material";
 
-import TextIncreaseIcon from "@mui/icons-material/TextIncrease";
-import TextDecreaseIcon from "@mui/icons-material/TextDecrease";
-//import ShareIcon from "@mui/icons-material/Share";
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 
 const API_KEY = DOCS_DRIVE_KEY;
@@ -27,14 +25,12 @@ const processSheetData = (data) => {
 
     const categorieRow = data.values[0];
     const numeriRow = data.values[1];
-
-    // Nome celebrazione (assumendo riga 4, colonna 0)
     const celebrazione = data.values[3]?.[0] || "";
 
     let lastCategory = "";
     const numeri = numeriRow.map((numeroStr, idx) => {
         const categoryCell = categorieRow[idx]?.trim();
-        if (categoryCell) lastCategory = categoryCell; // aggiorna categoria solo se non vuota
+        if (categoryCell) lastCategory = categoryCell;
         return {
             numero: parseInt(numeroStr, 10),
             category: lastCategory
@@ -46,17 +42,12 @@ const processSheetData = (data) => {
 
 export default function ListaCanti() {
     const { cantiMap, loading } = useContext(CantiContext);
+    const { fontSize } = useContext(ZoomContext); // Usa il fontSize globale
 
     const [numeriRichiesti, setNumeriRichiesti] = useState([]);
     const [loadingSheet, setLoadingSheet] = useState(true);
-
-    const [fontSize, setFontSize] = useState(18);
-
     const [celebrazione, setCelebrazione] = useState("");
-    const { nomeCelebrazione } = useParams()
-
-    const increaseFont = () => setFontSize(prev => Math.min(prev + 2, 32));
-    const decreaseFont = () => setFontSize(prev => Math.max(prev - 2, 14));
+    const { nomeCelebrazione } = useParams();
 
     useEffect(() => {
         async function caricaNumeri() {
@@ -80,144 +71,108 @@ export default function ListaCanti() {
 
     if (loading || loadingSheet)
         return (
-            <Box
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-                minHeight="60vh"
-            >
+            <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
                 <CircularProgress />
             </Box>
         );
 
     return (
-        <Box sx={{ position: "relative" }}>
-            {/* HEADER FISSO */}
-            <Box
-                sx={{
-                    position: "sticky",
-                    top: 0,
-                    zIndex: 1000,
-                    backgroundColor: "#fdf6e3",
-                    py: 1,
-                    px: 2,
-                    borderBottom: "1px solid #ddd",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    gap: 1
-                }}
-            >
-                <Typography variant="subtitle1" sx={{ fontFamily: "Georgia, serif" }}>
-                    Dimensione testo:
-                </Typography>
-                <IconButton onClick={decreaseFont} size="small">
-                    <TextDecreaseIcon />
-                </IconButton>
-                <IconButton onClick={increaseFont} size="small">
-                    <TextIncreaseIcon />
-                </IconButton>
-            </Box>
+        <Box sx={{ position: "relative", minHeight: "100vh", backgroundColor: "#f8f5ec", pb: 10 }}>
 
-            {/* CONTENUTO SCORRIBILE */}
-            <Container
-                maxWidth="md"
-                sx={{
-                    py: 4,
-                    backgroundColor: "#f8f5ec",
-                    minHeight: "100vh"
-                }}
-            >
+            {/* L'HEADER FISSO È STATO RIMOSSO: i tasti zoom sono ora nell'AppBar globale gestita dal Layout */}
+
+            <Container maxWidth="md" sx={{ py: 4 }}>
                 {celebrazione && (
                     <Typography
-                        variant="h5"
+                        variant="h4"
                         align="center"
                         sx={{
                             fontFamily: "Georgia, serif",
-                            fontWeight: 500,
-                            mb: 2,
-                            color: "#333"
+                            fontWeight: 600,
+                            mb: 1,
+                            color: "#333",
+                            fontSize: { xs: '1.8rem', sm: '2.2rem' }
                         }}
                     >
-                        Canti per la messa<br/>{celebrazione}
+                        {celebrazione}
                     </Typography>
                 )}
 
-                <Divider sx={{ mb: 3, width: "60%", margin: "0 auto 30px auto" }} />
+                <Typography align="center" color="text.secondary" sx={{ mb: 3, fontFamily: "Georgia, serif", fontStyle: 'italic' }}>
+                    Programma della celebrazione
+                </Typography>
 
-                {numeriRichiesti.map(({ numero, category }) => {
+                <Divider sx={{ mb: 5, width: "40%", margin: "0 auto 40px auto" }} />
+
+                {numeriRichiesti.map(({ numero, category }, index) => {
                     const canto = cantiMap[numero];
                     if (!canto) return null;
 
                     return (
-                        <Card
-                            key={numero}
-                            elevation={0}
-                            sx={{
-                                mb: 5,
-                                borderRadius: 4,
-                                backgroundColor: "#fffdf7",
-                                boxShadow: "0 4px 12px rgba(0,0,0,0.05)"
-                            }}
-                        >
-                            <CardContent>
-                                {/* Categoria sopra il numero */}
-                                <Typography
-                                    variant="subtitle1"
-                                    sx={{
-                                        mb: 1,
-                                        fontFamily: "Georgia, serif",
-                                        textAlign: "center",
-                                        fontWeight: 600,
-                                        fontSize: `${fontSize}px`,
-                                        color: "#555"
-                                    }}
-                                >
-                                    {category.toUpperCase()}
-                                </Typography>
+                        <Box key={`${numero}-${index}`} sx={{ mb: 6 }}>
+                            {/* Categoria come titolo di sezione */}
+                            <Typography
+                                variant="overline"
+                                sx={{
+                                    display: 'block',
+                                    textAlign: 'center',
+                                    fontWeight: 700,
+                                    letterSpacing: 2,
+                                    color: "#0D47A1", // Blu Mariano coerente con l'Header
+                                    mb: 1
+                                }}
+                            >
+                                {category}
+                            </Typography>
 
-                                <Box
-                                    className="liturgical-content"
-                                    sx={{
-                                        fontFamily: "Georgia, serif",
-                                        fontSize: `${fontSize}px`,
-                                        lineHeight: 1.9,
-                                        letterSpacing: "0.3px"
-                                    }}
-                                >
-                                    <GoogleDocFormattedReader
-                                        fileId={canto.id}
-                                        apiKey={API_KEY}
-                                    />
-                                </Box>
-                            </CardContent>
-                        </Card>
+                            <Card
+                                elevation={0}
+                                sx={{
+                                    borderRadius: 4,
+                                    backgroundColor: "#fffdf7",
+                                    boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                                    border: '1px solid #eee'
+                                }}
+                            >
+                                <CardContent sx={{ p: { xs: 2, sm: 4 } }}>
+                                    <Box
+                                        className="liturgical-content"
+                                        sx={{
+                                            fontFamily: "Georgia, serif",
+                                            fontSize: `${fontSize}px`, // FontSize dinamico dal Context
+                                            lineHeight: 1.9,
+                                            letterSpacing: "0.3px"
+                                        }}
+                                    >
+                                        <GoogleDocFormattedReader
+                                            fileId={canto.id}
+                                            apiKey={API_KEY}
+                                        />
+                                    </Box>
+                                </CardContent>
+                            </Card>
+                        </Box>
                     );
                 })}
             </Container>
-            <Box
-                sx={{
-                    position: "sticky",
-                    bottom: 0,
-                    zIndex: 1000,
-                    backgroundColor: "#fdf6e3",
-                    py: 1,
-                    px: 2,
-                    borderBottom: "1px solid #ddd",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    gap: 1
-                }}
-            >
+
+            {/* PULSANTE WHATSAPP FISSO (Floating Action Button style) */}
+            <Box sx={{ position: "fixed", bottom: 20, right: 20, zIndex: 1000 }}>
                 <IconButton
-                    sx={{ color: "#007700" }}
+                    sx={{
+                        backgroundColor: "#25D366",
+                        color: "white",
+                        width: 56,
+                        height: 56,
+                        boxShadow: 3,
+                        '&:hover': { backgroundColor: "#128C7E" }
+                    }}
                     onClick={() => {
-                        const url = encodeURIComponent(window.location.href); // link della pagina
-                        window.open(`https://wa.me/?text=${url}`, "_blank");
+                        const message = `Scaletta per la celebrazione: *${celebrazione}*\n\n${window.location.href}`;
+                        window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank");
                     }}
                 >
-                    <WhatsAppIcon />
+                    <WhatsAppIcon fontSize="large" />
                 </IconButton>
             </Box>
         </Box>
