@@ -5,10 +5,18 @@ import {
     Container, Typography, Box, CircularProgress, TextField,
     Button, Alert, Avatar, IconButton, Paper,
     Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Tooltip,
-    Snackbar
+    Snackbar, List
 } from "@mui/material";
 
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+
+import { useContext } from "react";
+import { CantiContext } from "./CantiContext";
+import LibraryMusicIcon from '@mui/icons-material/LibraryMusic';
+import SearchIcon from '@mui/icons-material/Search';
+import {
+    ListItem, ListItemButton, ListItemText
+} from "@mui/material";
 
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -49,6 +57,11 @@ export default function AdminCanti() {
     const [copied, setCopied] = useState(false);
 
     const publicLink = `${window.location.origin}/celebrazioni/${nomeCelebrazione}`;
+
+    const { cantiMap } = useContext(CantiContext); // Recupera i canti globali
+    const [openPicker, setOpenPicker] = useState(false);
+    const [activeCantoIndex, setActiveCantoIndex] = useState(null);
+    const [pickerSearch, setPickerSearch] = useState("");
 
     const handleCopyLink = () => {
         navigator.clipboard.writeText(publicLink);
@@ -255,6 +268,28 @@ export default function AdminCanti() {
         }
     };
 
+    const handleOpenPicker = (index) => {
+        setActiveCantoIndex(index);
+        setOpenPicker(true);
+        setPickerSearch(""); // Reset ricerca ogni volta che si apre
+    };
+
+    const handleSelectFromPicker = (numero) => {
+        if (activeCantoIndex !== null) {
+            handleChange(activeCantoIndex, "numero", numero);
+        }
+        setOpenPicker(false);
+    };
+
+// Filtro per la ricerca nel picker (Titolo o Numero)
+    const filteredPickerCanti = Object.values(cantiMap || {})
+        .filter(c => {
+            const term = pickerSearch.toLowerCase();
+            const titolo = (c.titolo || c.name || "").toLowerCase();
+            return titolo.includes(term) || String(c.numero).includes(term);
+        })
+        .sort((a, b) => parseInt(a.numero) - parseInt(b.numero));
+
     if (!user) return <Login />;
 
     if (loadingData) {
@@ -365,11 +400,26 @@ export default function AdminCanti() {
                                                             </Box>
                                                         )}
 
-                                                        <TextField
-                                                            label="N°" variant="outlined" value={canto.numero} type="number"
-                                                            sx={{ width: { xs: 60, sm: 80 }, flexShrink: 0 }}
-                                                            onChange={(e) => handleChange(idx, "numero", e.target.value)} size="small"
-                                                        />
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                                            <TextField
+                                                                label="N°"
+                                                                variant="outlined"
+                                                                value={canto.numero}
+                                                                type="number"
+                                                                sx={{ width: { xs: 60, sm: 80 }, flexShrink: 0 }}
+                                                                onChange={(e) => handleChange(idx, "numero", e.target.value)}
+                                                                size="small"
+                                                            />
+                                                            <Tooltip title="Scegli dall'elenco">
+                                                                <IconButton
+                                                                    size="small"
+                                                                    onClick={() => handleOpenPicker(idx)}
+                                                                    sx={{ bgcolor: '#f5f5f5' }}
+                                                                >
+                                                                    <LibraryMusicIcon fontSize="small" />
+                                                                </IconButton>
+                                                            </Tooltip>
+                                                        </Box>
                                                     </Box>
 
                                                     <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 0.5 }}>
@@ -512,6 +562,57 @@ export default function AdminCanti() {
                         Hai modifiche non salvate!
                     </Alert>
                 </Snackbar>
+
+                {/* --- DIALOG PICKER CANTO --- */}
+                <Dialog
+                    open={openPicker}
+                    onClose={() => setOpenPicker(false)}
+                    fullWidth
+                    maxWidth="xs"
+                    PaperProps={{ sx: { borderRadius: 3, height: '80vh' } }}
+                >
+                    <DialogTitle sx={{ fontWeight: 'bold', pb: 1 }}>Seleziona un Canto</DialogTitle>
+                    <Box sx={{ px: 3, pb: 2 }}>
+                        <TextField
+                            fullWidth
+                            placeholder="Cerca per titolo o numero..."
+                            variant="outlined"
+                            size="small"
+                            value={pickerSearch}
+                            onChange={(e) => setPickerSearch(e.target.value)}
+                            InputProps={{
+                                startAdornment: (
+                                    <IconButton size="small" sx={{ mr: 1 }}><SearchIcon /></IconButton>
+                                ),
+                            }}
+                        />
+                    </Box>
+                    <DialogContent dividers sx={{ p: 0 }}>
+                        <List>
+                            {filteredPickerCanti.map((canto) => (
+                                <ListItem key={canto.id} disablePadding>
+                                    <ListItemButton onClick={() => handleSelectFromPicker(canto.numero)}>
+                                        <Avatar sx={{ bgcolor: '#f0f0f0', color: '#555', mr: 2, width: 35, height: 35, fontSize: '0.9rem', fontWeight: 'bold' }}>
+                                            {canto.numero}
+                                        </Avatar>
+                                        <ListItemText
+                                            primary={canto.titolo || canto.name}
+                                            primaryTypographyProps={{ variant: 'body2', fontWeight: 500 }}
+                                        />
+                                    </ListItemButton>
+                                </ListItem>
+                            ))}
+                            {filteredPickerCanti.length === 0 && (
+                                <Typography sx={{ p: 3, textAlign: 'center', color: 'text.secondary' }}>
+                                    Nessun canto trovato
+                                </Typography>
+                            )}
+                        </List>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setOpenPicker(false)} color="inherit">Annulla</Button>
+                    </DialogActions>
+                </Dialog>
 
             </Container>
         </Box>

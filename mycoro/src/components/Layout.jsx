@@ -100,7 +100,7 @@ export default function Layout({ children }) {
                         onClick={() => navigate('/')}
                         sx={{ fontFamily: "Georgia, serif", fontWeight: 600, flexGrow: 1, cursor: 'pointer', color:'rgba(0,0,0,0.65)' }}
                     >
-                        Repertorio Canti
+                        MyCoro
                     </Typography>
 
                     {/* Tasti Zoom dinamici */}
